@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+	<head>
+		<title>Interactive D&amp;D Map</title>
+		<meta charset='utf-8' />
+		<style>
+			* { box-sizing: border-box; }
+			.screen {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+			}
+			.hidden {
+				display: none;
+			}
+			#canvas {
+				background: lightslategrey;
+			}
+			#toolbar {
+				position: absolute;
+				bottom: 0;
+				left: 0;
+				height: 61px;
+				width: 100%;
+			}
+			.button {
+				height: 61px;
+				width: 61px;
+				border-right: 1px solid #000;
+				border-top: 1px solid #000;
+				float: left;
+			}
+			.mode.active {
+				border: 2px solid #000;
+				border-left: 1px solid #000;
+			}
+			input[type=color] {
+				float: top;
+				height: 30px;
+				width: 61px;
+				border: none;
+			}
+			input[type=color]::-webkit-color-swatch-wrapper {
+				padding: 0;
+			}
+			input[type=color]::-webkit-color-swatch {
+				border: none;
+			}
+			.color-button {
+				height: 61px;
+				width: 61px;
+				border-right: 1px solid #000;
+				border-top: 1px solid #000;
+				float: left;
+				background: #000;
+			}
+			.color-button.active input[type=color] {
+				width: 59px;
+			}
+			#status {
+				position: absolute;
+				top: 0;
+				right: 0;
+				padding: 5px;
+				background: #E4864B;
+				border-left: 1px solid black;
+				border-bottom: 1px solid black;
+				border-bottom-left-radius: 5px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id='main'>
+			<p>
+				Interactive D&amp;D Map Visualiser. Press Join to join as a player, or, if you're the DM enter the DM password (comes up when you run the server) and press Host as DM.
+			</p>
+			<button onclick='join()'>Join</button>
+			<p>
+				Or, for the DM
+			</p>
+			<input id='dmpwd' type='password' />
+			<button onclick='dmlogin()'>Host as DM</button>
+		</div>
+
+		<div id='map' class='screen hidden'>
+			<canvas id='canvas' class='screen'>
+				Please stop using Internet Explorer. Seriously. Chrome and Firefox are so much better.
+			</canvas>
+			<div id='dm' class='hidden'>
+				<div id='status' title='Use H and E keys to change view.'>DM view</div>
+				<div id='toolbar'>
+					<!-- An ugly chunk of JS is used to apply data-color to background colours -->
+					<div data-color='lightgrey'		class='button mode active' onclick='dmmode(this, "fow")'>Fog of War</div>
+					<div data-color='#1F0D07'		class='button mode' onclick='dmcolor(this)'></div>
+					<div data-color='#745217'		class='button mode' onclick='dmcolor(this)'></div>
+					<div data-color='#E4864B'		class='button mode' onclick='dmcolor(this)'></div>
+					<div data-color='#CCA095'		class='button mode' onclick='dmcolor(this)'></div>
+					<div data-color='#887D94'	class='button mode' onclick='dmcolor(this)'></div>
+					<div data-color='darkslategrey'	class='button mode' onclick='dmcolor(this)'></div>
+					<div class='color-button mode' onclick='dmcolorpicker(this)'>
+						<input type='color' id='cp1' />
+					</div>
+					<div class='color-button mode' onclick='dmcolorpicker(this)'>
+						<input type='color' id='cp2' />
+					</div>
+					<div class='color-button mode' onclick='dmcolorpicker(this)'>
+						<input type='color' id='cp3' />
+					</div>
+					<div class='color-button mode' onclick='dmcolorpicker(this)'>
+						<input type='color' id='cp4' />
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script src='/socket.io/socket.io.js'></script>
+		<script src='client.js'></script>
+		<script src='map.js'></script>
+	</body>
+
+</html>

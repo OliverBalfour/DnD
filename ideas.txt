@@ -1,0 +1,12 @@
+/help
+/kick ID
+/roll XdY
+/mute yellow/blue/green (mutes yellow/blue/green alerts)
+
+
+events:
+
+dm pwd
+dmy, dmn
+kick
+init

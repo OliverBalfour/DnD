@@ -1,0 +1,14 @@
+{
+  "name": "dnd",
+  "version": "1.0.0",
+  "description": "DnD Map Tools",
+  "author": "Oliver Balfour",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^1.1.3",
+    "express": "^4.15.2",
+    "jsonfile": "^2.4.0",
+    "socket.io": "^1.7.3",
+    "uws": "^0.13.0"
+  }
+}
