@@ -19,6 +19,10 @@
 			#canvas {
 				background: lightslategrey;
 			}
+			#dm {
+				user-select: none;
+				-moz-user-select: none;
+			}
 			#toolbar {
 				position: absolute;
 				bottom: 0;
@@ -32,6 +36,7 @@
 				border-right: 1px solid #000;
 				border-top: 1px solid #000;
 				float: left;
+				padding: 4px;
 			}
 			.mode.active {
 				border: 2px solid #000;
@@ -70,37 +75,175 @@
 				border-bottom: 1px solid black;
 				border-bottom-left-radius: 5px;
 			}
+			#topbar {
+				position: absolute;
+				top: 0;
+				left: 0;
+				height: 60px;
+				width: 100%;
+			}
+			.tbutton {
+				height: 61px;
+				width: 81px;
+				border-right: 1px solid #000;
+				border-bottom: 1px solid #000;
+				float: left;
+			}
+			.half-button {
+				width: 80px;
+				height: 30px;
+				float: top;
+				background: lightgrey;
+				border-top: 1px solid #000;
+				cursor: pointer;
+				padding: 4px;
+			}
+			.half-button:hover {
+				background: grey;
+			}
+			.modalb {
+				background: rgba(0, 0, 0, 0.5);
+				z-index: 2;
+			}
+			.modal {
+				position: absolute;
+				top: calc(50% - 200px);
+				left: calc(50% - 275px);
+				height: 400px;
+				width: 550px;
+				padding: 20px;
+				background: white;
+				z-index: 3;
+			}
+			#chat {
+				position: absolute;
+				bottom: 0;
+				right: 0;
+				height: 240px;
+				width: 300px;
+				border-left: 1px solid #000;
+				border-top: 1px solid #000;
+			}
+			#chat.collapsed {
+				height: 31px;
+				width: 100px;
+			}
+			#chat.collapsed #message-history, #chat.collapsed #chatbar {
+				display: none;
+			}
+			#chatstatusbar {
+				position: absolute;
+				top: 0;
+				left: 0;
+				height: 30px;
+				width: 100%;
+				padding: 4px;
+				background: #BDBDBD;
+				box-shadow: 0px 1px 2px 0px rgba(0,0,0,0.5);
+				z-index: 1;
+			}
+			#message-history {
+				position: absolute;
+				top: 30px;
+				left: 0;
+				height: 174px;
+				width: 100%;
+				background: #F5F5F5;
+				overflow-y: auto;
+			}
+			#chatbar {
+				position: absolute;
+				bottom: 0;
+				left: 0;
+				height: 36px;
+				width: 100%;
+				padding: 8px;
+				outline: none;
+				border: 1px solid #999;
+				transition: border-color 0.3s;
+			}
+			#chatbar:focus {
+				border-color: #666;
+			}
+			.message {
+				padding: 4px;
+				padding-left: 10px;
+			}
+			.author {
+				display: block;
+			}
+			.author-server {
+				display: block;
+				color: darkblue;
+			}
 		</style>
 	</head>
 
 	<body>
 		<div id='main'>
 			<p>
-				Interactive D&amp;D Map Visualiser. Press Join to join as a player, or, if you're the DM enter the DM password (comes up when you run the server) and press Host as DM.
+				Interactive D&amp;D Map Visualiser. Enter your name, then press Join to join as a player, or, if you're the DM enter the DM password (comes up when you run the server) and press Host as DM.
+			</p>
+			<input id='username' placeholder='Username' />
+			<p>
+				For players
 			</p>
 			<button onclick='join()'>Join</button>
 			<p>
 				Or, for the DM
 			</p>
-			<input id='dmpwd' type='password' />
+			<input id='dmpwd' type='password' placeholder='DM password for session' />
 			<button onclick='dmlogin()'>Host as DM</button>
+			<p>
+				There are a lot of keyboard shortcuts in this program, it's worth looking through the list (you can still refer to them in the editor in the top menu)
+			</p>
+			<button onclick='dom.show("kbdshortcuts")'>Keyboard Shortcuts</button>
+			<button onclick='dom.show("help-modal")'>Help</button>
 		</div>
 
 		<div id='map' class='screen hidden'>
 			<canvas id='canvas' class='screen'>
 				Please stop using Internet Explorer. Seriously. Chrome and Firefox are so much better.
 			</canvas>
+
 			<div id='dm' class='hidden'>
+				<div id='topbar'>
+					<div class='tbutton'>
+						<div class='half-button' onclick='exportmap()'>Export</div>
+						<div class='half-button' onclick='importmap()'>Import</div>
+					</div>
+					<div class='tbutton'>
+						<div class='half-button' onclick='savemap()'>Save map</div>
+						<div class='half-button' onclick='loadmap()'>Load map</div>
+					</div>
+					<div class='tbutton'>
+						<div class='half-button' onclick='newmap()'>New map</div>
+						<div class='half-button' onclick='resizemap()'>Resize map</div>
+					</div>
+					<div class='tbutton'>
+						<div class='half-button' onclick='dom.show("help-modal")'>Help</div>
+						<div class='half-button' onclick='dom.show("kbdshortcuts")'>KBD</div>
+					</div>
+				</div>
 				<div id='status' title='Use H and E keys to change view.'>DM view</div>
 				<div id='toolbar'>
+
 					<!-- An ugly chunk of JS is used to apply data-color to background colours -->
-					<div data-color='lightgrey'		class='button mode active' onclick='dmmode(this, "fow")'>Fog of War</div>
+
+					<div data-color='lightgrey' class='button mode active' onclick='dmmode(this, "fow")'>Fog of War</div>
+					<div data-color='rgba(173, 216, 230, 0.5)' class='button mode' onclick='dmmode(this, "spell")'>Spell Effect</div>
+					<div data-color='white' class='button mode' onclick='dmmode(this, "icon")'>
+						Icons
+						<button onclick='socket.emit("ilr")'>Choose</button>
+					</div>
+
 					<div data-color='#1F0D07'		class='button mode' onclick='dmcolor(this)'></div>
 					<div data-color='#745217'		class='button mode' onclick='dmcolor(this)'></div>
 					<div data-color='#E4864B'		class='button mode' onclick='dmcolor(this)'></div>
 					<div data-color='#CCA095'		class='button mode' onclick='dmcolor(this)'></div>
-					<div data-color='#887D94'	class='button mode' onclick='dmcolor(this)'></div>
+					<div data-color='#887D94'		class='button mode' onclick='dmcolor(this)'></div>
 					<div data-color='darkslategrey'	class='button mode' onclick='dmcolor(this)'></div>
+
 					<div class='color-button mode' onclick='dmcolorpicker(this)'>
 						<input type='color' id='cp1' />
 					</div>
@@ -113,7 +256,76 @@
 					<div class='color-button mode' onclick='dmcolorpicker(this)'>
 						<input type='color' id='cp4' />
 					</div>
+
 				</div>
+				<div id='import-modal' class='modalb screen hidden'>
+					<div id='importmm' class='modal'>
+						<input type='file' id='import-json' value='' />
+						<p>
+							Import JSON data (either exported .json file or an autosave file)<br>
+							Warning: Importing a map will erase the current one. In order to preserve the current one either copy the autosave file or export it first. Autosave files are found in the server's /autosave/ folder, with files named as `save-[DM-PASSWORD-FOR-SESSION].json`
+						</p>
+						<button onclick='importJSON()'>Apply</button>
+						<button onclick='dom.hide("import-modal")'>Cancel</button>
+					</div>
+				</div>
+				<div id='loadmap-modal' class='modalb screen hidden'>
+					<div id='loadmm' class='modal'>
+						<p>
+							Please select a map to load
+						</p>
+						<ul id='loadmm-list'></ul>
+						<button onclick='dom.hide("loadmap-modal")'>Cancel</button>
+					</div>
+				</div>
+				<div id='iconlist-modal' class='modalb screen hidden'>
+					<div id='iconmm' class='modal'>
+						<p>
+							Please select an icon (there are a hell of a lot)
+						</p>
+						<ul id='iconmm-list'></ul>
+						<button onclick='dom.hide("iconlist-modal")'>Cancel</button>
+					</div>
+				</div>
+			</div>
+
+			<div id='chat'>
+				<div id='chatstatusbar'>
+					<!-- A bit of ugly inline CSS used here -->
+					<button id='togglechat' style='float:right' onclick='toggleChat()'>-</button>
+					<span style='display: block; padding-top: 2px; padding-left: 4px'>Chat</span>
+				</div>
+				<div id='message-history'></div>
+				<input id='chatbar' placeholder='Chat or /help for commands' />
+			</div>
+		</div>
+
+		<div id='kbdshortcuts' class='modalb screen hidden'>
+			<div class='modal'>
+				<p>Universal kbd shortcuts</p>
+				<ul>
+					<li>+ - Zoom in</li>
+					<li>- - Zoom out</li>
+					<li>C - Toggle chat</li>
+					<li>G - Toggle grid</li>
+				</ul>
+				<p>DM kbd shortcuts</p>
+				<ul>
+					<li>0-9 - Bind to the 10 colours</li>
+					<li>F or ~ - Fog of War mode</li>
+					<li>S for Spell Effect mode</li>
+					<li>I for Icon Placement/Toggle mode</li>
+					<li>H - Toggle player view</li>
+					<li>E - Toggle edit view, or inverted player view. You see only what players can't</li>
+					<li>Left/Right and A/D - Alternate between colours</li>
+				</ul>
+				<button onclick='dom.hide("kbdshortcuts")'>Close</button>
+			</div>
+		</div>
+		<div id='help-modal' class='modalb screen hidden'>
+			<div class='modal'>
+				<p>Help: Ask Oliver. xD</p>
+				<button onclick='dom.hide("help-modal")'>Close</button>
 			</div>
 		</div>
 

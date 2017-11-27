@@ -42,9 +42,10 @@
 	
 	const tree = {
 		password: (Math.floor(Math.random() * 10000) + 1) + '',
-		DM: null,
-		map: new Map(io, 16, 16)
+		DM: null
 	}
+
+	tree.map = new Map(tree, io, 16, 16);
 
 	console.log(chalk.cyan('The DM password for this session is ' + tree.password));
 	
